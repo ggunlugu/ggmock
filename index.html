@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+    <html>
+    <head>
+        <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+        <title>Gelistirici Günlüğü :: jQuery'de Ajax İsteklerini Mock'layarak Test Edilebilir Frontend Kodu oluşturma</title>
+        <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.6.4/jquery.min.js"></script>
+        <script type="text/javascript" src="GGMock.js"></script>
+
+        <script type="text/javascript">
+            /**
+             * Burasi mock icin kullandigimiz sinif
+             * bu kod blogunu kaldirdigimizda her sey normalmis gibi devam edecektir
+             */
+
+            //jquery mock sinifini init edip baslatiyoruz
+            var ggMock = new GGMock();
+
+            //cevabin donme suresini de degistirebilirsiniz
+            //ggMock.setDelay(5000);
+
+            ggMock.start();
+
+            //kodun herhangi bir yerinde mocklamayi iptal edip, gercek istekler yapmasini saglayabilirsiniz
+            //ggMock.stop();
+
+            //veri tipi JSON olan istekleri mockladigimiz yer
+            //onText ve onXML methodlarini da override edebilirsiniz
+            ggMock.onJSON = function (requestOptions) {
+                var url = requestOptions.url;
+                var params = requestOptions.data;
+
+                if (url == "getUserName.php" && params == "id=12") {
+                    return {user : "Osman Yuksel", webSite : "gelistiricigunlugu.com"};
+                }
+                else {
+                    return {error : "unknown request"};
+                }
+            };
+        </script>
+
+    </head>
+    <body>
+        <a href="#" class="sendXhr" data-id="12">
+            Id'si 12 olan kullanicinin verisi getirme isteği yap
+        </a>
+
+        <a href="#" class="sendXhr">
+            Başka bir istek yap
+        </a>
+
+
+        <script type="text/javascript">
+            $(".sendXhr").click(function (e) {
+                e.preventDefault();
+                var id = $(this).data("id");
+
+                $.post("getUserName.php", {id : id}, function (response) {
+                    if (response.user && response.webSite) {
+                        alert("User : " + response.user + ",  WebSite : " + response.webSite);
+                    }
+                    else {
+                        alert('Error!!! ' + response.error);
+                    }
+                },'json');
+            });
+        </script>
+    </body>
+
+</html>
